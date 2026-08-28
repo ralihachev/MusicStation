@@ -1,0 +1,15 @@
+# Local credentials
+config.h
+
+# Local engineering notes and archived prototypes
+OPTIMIZATION_TODO.md
+PUBLISH_TODO.md
+CURRENT_STATE.md
+MusicStation_v1_wifi_lyrics_cover.md
+
+# Arduino and OS-generated files
+build/
+*.bin
+*.elf
+*.map
+.DS_Store
