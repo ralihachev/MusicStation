@@ -18,6 +18,17 @@ Bluetooth, and memory-management parts before the audio hardware is added.
 > microSD storage, an amplifier, speakers, or physical buttons, and it currently
 > relies on an iPhone for playback state plus Wi-Fi for artwork and lyrics.
 
+## V2: offline player
+
+The next version moves the music library onto a microSD card and adds local
+artwork, synchronized lyrics, playlists, five physical buttons, and a path to
+I2S audio through a MAX98357A amplifier. The firmware, storage layout, wiring
+notes, UI design, and preparation tools are in [V2](V2/README.md).
+
+> **V2 status:** M0-M6 are written, but the new sketch has not yet been run on
+> the wired hardware. Audio uses a simulated playhead until the amplifier is
+> fitted.
+
 ## What V1 does today
 
 - Pairs from normal iOS Bluetooth settings as a BLE HID accessory.
