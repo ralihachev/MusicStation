@@ -20,6 +20,8 @@ Bluetooth, and memory-management parts before the audio hardware is added.
 
 ## V2: offline player
 
+![MusicStation V2 e-paper library menu on wired hardware](images/musicstation-v2.jpg)
+
 The next version moves the music library onto a microSD card and adds local
 artwork, synchronized lyrics, playlists, five physical buttons, and a path to
 I2S audio through a MAX98357A amplifier. The firmware, storage layout, wiring
