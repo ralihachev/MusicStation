@@ -2,34 +2,60 @@
 
 *A RomansLab project: building a focused, physical way to experience music.*
 
+MusicStation is an ESP32-S3 music player built around a 2.9-inch e-paper
+display. It started as an iPhone now-playing companion and is now a
+self-contained, offline station: music, artwork and synchronized lyrics on a
+microSD card, five physical buttons, and MP3 playback through a MAX98357A I2S
+amplifier into small speakers. No phone, no hotspot, no cloud service.
+
+## Versions
+
+| Version | Folder | What it is | Status |
+|---|---|---|---|
+| **V3** | [`V3/`](V3/README.md) | Offline station with sound: microSD library, buttons, lyrics, I2S audio | **Current.** Playing music on the wired hardware |
+| V2 | [`V2/`](V2/README.md) | Offline station UI and playback model against a simulated playhead | Superseded by V3 |
+| V1 | repository root | iPhone companion: BLE now-playing, artwork and lyrics over Wi-Fi | Working prototype, kept as is |
+
+Each version is a separate sketch rather than an edit of the last, because
+they have almost opposite dependency profiles: V1 needs BLE, Wi-Fi, TLS, JSON
+and JPEG decoding; V3 needs none of them and spends the freed RAM on audio.
+
+## V3: offline station with sound
+
+![MusicStation V2/V3 e-paper library menu on wired hardware](images/musicstation-v2.jpg)
+
+V3 plays MP3s straight off the card. The decoder runs on its own core so the
+roughly 780 ms e-paper refresh never interrupts the music, lyrics follow the
+samples actually sent to the amplifier, and a software filter voices the
+output for small cavity speakers.
+
+- Browse by artist, album, track or playlist with five buttons; letter jump
+  for long lists.
+- Synchronized `.lrc` lyrics and pre-baked 1-bit cover art from the card,
+  prepared on a Mac by [`V3/tools/prepare_album.py`](V3/tools/prepare_album.py).
+- Hold UP/DOWN for volume; hold MENU to tune lyric sync by ear while a song
+  plays.
+- Resumes the same track at the same position after power-off; deep sleep
+  with button wake.
+- One amplifier and speaker, or two in parallel, on five GPIOs.
+
+Start with the [V3 README](V3/README.md), then [wiring](V3/WIRING.md). Board
+settings are the same for every version: ESP32-S3, USB CDC on boot, Huge APP
+partition scheme, PSRAM disabled.
+
+> **V3 status:** running on the wired hardware with a MAX98357A and an 8 ohm
+> cavity speaker. Lyric timing and speaker voicing are being tuned by ear;
+> battery power and an enclosure come next.
+
+## V1: iPhone companion
+
 ![MusicStation V1 prototype showing artwork, synchronized lyrics, and playback status](images/musicstation-v1.jpg)
 
-MusicStation is an ESP32-S3 music interface built around a 2.9-inch e-paper
-display. The current V1 is a working iPhone companion: it reads now-playing
-metadata through Bluetooth, fetches album artwork and synchronized lyrics over
-Wi-Fi, and renders a compact monochrome player screen.
-
-The long-term goal is a self-contained, offline music station with music stored
-on microSD, physical controls, local audio playback, speakers, and a MAX98357A
-I2S amplifier. V1 proves the display, interaction, metadata, artwork, lyrics,
-Bluetooth, and memory-management parts before the audio hardware is added.
-
-> **Current status:** functional display prototype. It does not yet contain
-> microSD storage, an amplifier, speakers, or physical buttons, and it currently
-> relies on an iPhone for playback state plus Wi-Fi for artwork and lyrics.
-
-## V2: offline player
-
-![MusicStation V2 e-paper library menu on wired hardware](images/musicstation-v2.jpg)
-
-The next version moves the music library onto a microSD card and adds local
-artwork, synchronized lyrics, playlists, five physical buttons, and a path to
-I2S audio through a MAX98357A amplifier. The firmware, storage layout, wiring
-notes, UI design, and preparation tools are in [V2](V2/README.md).
-
-> **V2 status:** M0-M6 are written, but the new sketch has not yet been run on
-> the wired hardware. Audio uses a simulated playhead until the amplifier is
-> fitted.
+V1 is the original prototype and the rest of this README documents it. It reads
+now-playing metadata from an iPhone over Bluetooth, fetches album artwork and
+synchronized lyrics over Wi-Fi, and renders a compact monochrome player screen.
+It proved the display, refresh discipline, text rendering, artwork and lyric
+handling that V2 and V3 build on.
 
 ## What V1 does today
 
@@ -52,18 +78,18 @@ buttons are wired in V1.
 
 | Stage | Purpose | Status |
 |---|---|---|
-| V1 | ESP32-S3 + e-paper iPhone now-playing display | Working prototype |
-| V1.x | Physical play/pause, next, and previous buttons | Planned |
-| V2 | microSD music library and local track navigation | Planned |
-| V2 | ESP32 I2S audio output through MAX98357A | Planned |
-| V2 | Integrated speakers, power design, and enclosure | Planned |
-| Later | Fully offline artwork, metadata, and synchronized lyrics | Direction |
+| V1 | ESP32-S3 + e-paper iPhone now-playing display | Done |
+| V2 | microSD library, buttons, browsing UI, local lyrics and artwork | Done, in V3 |
+| V3 | MP3 playback over I2S through MAX98357A, speakers | Working |
+| V3 | Fully offline artwork, metadata and synchronized lyrics | Done |
+| Next | Battery, power measurements, enclosure | Planned |
 
-The intended destination is an appliance that can play music without a phone,
-hotspot, or cloud service. The current online integrations are useful prototype
-infrastructure, not the final dependency model.
+The destination is an appliance that plays music without a phone, hotspot, or
+cloud service. V3 reaches it for playback; V1's online integrations survive
+only in the Mac-side preparation tool, which fetches lyrics and artwork once
+when an album is copied to the card.
 
-## Current hardware
+## V1 hardware
 
 - ESP32-S3 board/module using ESP32-S3-WROOM-1U
 - External 2.4 GHz antenna for the `-1U` module
@@ -86,7 +112,7 @@ infrastructure, not the final dependency model.
 MISO is not used. Power the display from 3.3 V. See [WIRING.md](WIRING.md)
 for more detailed hardware notes.
 
-## Software dependencies
+## V1 software dependencies
 
 The latest verified build uses:
 
@@ -103,7 +129,7 @@ Select an ESP32-S3 board profile with:
 - Huge APP partition scheme
 - PSRAM disabled for the currently tested board
 
-## Build and configure
+## Build and configure V1
 
 1. Install the dependencies listed above through the Arduino Library Manager.
 2. Copy `config.example.h` to `config.h`.
@@ -153,7 +179,7 @@ E-paper refreshes are region-based:
 - Right column for lyric changes
 - Bottom-right strip for time, progress, and play/pause state
 
-## Current limitations
+## V1 limitations
 
 - Playback audio still comes from the paired iPhone.
 - Artwork and lyrics currently require internet access.
